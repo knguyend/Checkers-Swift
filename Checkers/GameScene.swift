@@ -6,84 +6,243 @@
 //  Copyright © 2018 Khang Nguyen. All rights reserved.
 //
 
+import Foundation
 import SpriteKit
 import GameplayKit
+
+//use chosen for gamescene not
 
 class GameScene: SKScene {
     
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
+    var game: Game = Game(depth: 5)
+    var squares = [SKSpriteNode]()
+    
     
     override func didMove(to view: SKView) {
+        initBackground()
+        //initBoard()
+        //startGame()
+        drawBoard()
+        drawPieces()
+        //displayPossibleMoves(name: "w52", game: game)
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
+    }
+    
+    func drawPieces() {
+        let squareSide = Int((view?.bounds.width)!/8)
+        var toggle: Bool = true
+        //let alphas:String = "abcdefgh"
+        //White pieces
+        for row in 0...2 {
+            for col in 0...7 {
+                if (toggle), let square = squareWithName(name: "\(7-row)\(col)"){
+                    let gamePiece = SKSpriteNode(imageNamed: "WhitePiece.png")
+                    gamePiece.size = CGSize(width: squareSide, height: squareSide)
+                    gamePiece.name = "w\(7-row)\(col)"
+                    square.addChild(gamePiece)
+                }
+                toggle = !toggle
+            }
+            toggle = !toggle
         }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
+        //Red pieces
+        toggle = false
+        for row in 5...7 {
+            for col in 0...7 {
+                if (toggle), let square = squareWithName(name: "\(7-row)\(col)"){
+                    let gamePiece = SKSpriteNode(imageNamed: "RedPiece.png")
+                    gamePiece.size = CGSize(width: squareSide, height: squareSide)
+                    gamePiece.name = "r\(7-row)\(col)"
+                    square.addChild(gamePiece)
+                }
+                toggle = !toggle
+            }
+            toggle = !toggle
         }
     }
     
-    
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
+    func drawBoard() {
+        // Board parameters
+        let squareSide = Int((view?.bounds.width)!/8)
+        let numRows = 8
+        let numCols = 8
+        let squareSize = CGSize(width: squareSide, height: squareSide)
+        let xOffset:CGFloat = 25
+        let yOffset:CGFloat = 200
+        // Column characters
+        //let alphas:String = "abcdefgh"
+        // Used to alternate between white and black squares
+        var toggle:Bool = false
+        for row in 0...numRows-1 {
+            for col in 0...numCols-1 {
+                // Letter for this column
+                //let colChar = Array(alphas)[col]
+                // Determine the color of square
+                let color = toggle ? SKColor.white : SKColor.black
+                let square = SKSpriteNode(color: color, size: squareSize)
+                square.position = CGPoint(x: CGFloat(col) * squareSize.width + xOffset,
+                                          y: CGFloat(row) * squareSize.height + yOffset)
+                // Set sprite's name (e.g., a8, c5, d1)
+                square.name = "\(7-row)\(col)"
+                self.addChild(square)
+                toggle = !toggle
+            }
+            toggle = !toggle
         }
     }
     
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
+    func initBackground(){
+        backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
     }
     
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
+    
+    func squareWithName(name:String) -> SKSpriteNode? {
+        let square:SKSpriteNode? = self.childNode(withName: name) as! SKSpriteNode?
+        return square
+    }
+    
+    func drawSquare(rect: CGRect, white: Bool){
+        let layer = CAShapeLayer()
+        layer.path = UIBezierPath(rect: rect).cgPath
+        if (white){
+            layer.fillColor = UIColor.white.cgColor
         }
+        else {
+            layer.fillColor = UIColor.black.cgColor
+        }
+        view?.layer.addSublayer(layer)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
+        let touch:UITouch = touches.first!
+        let positionInScene = touch.location(in: self)
+        let touchedNode = self.atPoint(positionInScene)
         
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+        if let name = touchedNode.name
+        {
+            print(name)
+            if (game.isSelectingPiece){
+                if (Array(name)[0] != "w"){
+                    
+                }
+                let coord = Coordinate(x: rowFromName(name: name), y: colFromName(name: name))
+                game.chosenOne = coord
+                squares = displayPossibleMoves(name: name, game: game)
+                game.isSelectingPiece = !game.isSelectingPiece
+                return
+            }
+            else {
+                if (moveSelected(squares: squares, name: name, game: game)){
+                    let move = game.computerMove()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
+                        self.removePiece(row: move.start.row, col: move.start.col)
+                        if (move.isJump){
+                            self.removePiece(row: move.captured.row, col: move.captured.col)
+                        }
+                        self.drawPiece(row: move.end.row, col: move.end.col, player: "c", alpha: 1.0)
+                    })
+                    
+                }
+                game.isSelectingPiece = !game.isSelectingPiece
+            }
+        }
     }
     
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
+    func displayPossibleMoves(name: String, game: Game) -> [SKSpriteNode] {
+        var ret = [SKSpriteNode]()
+        if (Array(name)[0] != "w"){ //not a white piece
+            return ret
+        }
+        else {
+            let row = rowFromName(name: name)
+            let col = colFromName(name: name)
+            let arr = possibleMoves(row: row, col: col, board: game.board)
+            let squareSide = Int((view?.bounds.width)!/8)
+            for coord in arr {
+                let row = coord.row
+                let col = coord.col
+                print("\(row)\(col)")
+                if let square = squareWithName(name: "\(row)\(col)"){
+                    let gamePiece = SKSpriteNode(imageNamed: "WhitePiece.png")
+                    gamePiece.size = CGSize(width: squareSide, height: squareSide)
+                    gamePiece.name = "s\(row)\(col)"
+                    gamePiece.alpha = 0.5
+                    square.addChild(gamePiece)
+                    ret.append(square)
+                }
+            }
+            return ret
+        }
     }
     
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+    func deleteMoveOptions(squares: [SKSpriteNode]){
+        for square in squares {
+            square.removeAllChildren()
+        }
     }
     
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+    func moveSelected(squares: [SKSpriteNode], name: String, game: Game) -> Bool {
+        if (Array(name)[0] != "s"){
+            deleteMoveOptions(squares: squares)
+            return false
+        }
+        else {
+            let move = Move(startRow: game.chosenOne.row, startCol: game.chosenOne.col, endRow: rowFromName(name: name), endCol: colFromName(name: name))
+            game.board.updateBoard(curr: move.start, next: move.end, player: "u")
+            deleteMoveOptions(squares: squares)
+            removePiece(row: move.start.row, col: move.start.col)
+            drawPiece(row: move.end.row, col: move.end.col, player: "u", alpha: 1)
+            if (move.isJump){
+                removePiece(row: move.captured.row, col: move.captured.col)
+            }
+            
+            return true
+        }
+            
     }
     
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+    func drawPiece(row: Int, col: Int, player: Character, alpha: CGFloat){
+        let squareSide = Int((view?.bounds.width)!/8)
+        if let square = squareWithName(name: "\(row)\(col)"){
+            if (player == "u"){
+                let gamePiece = SKSpriteNode(imageNamed: "WhitePiece.png")
+                gamePiece.size = CGSize(width: squareSide, height: squareSide)
+                if (alpha < 1) {
+                    gamePiece.name = "s\(row)\(col)"
+                    gamePiece.alpha = alpha
+                }
+                else {
+                    gamePiece.name = "w\(row)\(col)"
+                }
+                square.addChild(gamePiece)
+            }
+            else {
+                let gamePiece = SKSpriteNode(imageNamed: "RedPiece.png")
+                gamePiece.name = "r\(row)\(col)"
+                gamePiece.size = CGSize(width: squareSide, height: squareSide)
+                square.addChild(gamePiece)
+            }
+        }
     }
+        
+    func removePiece(row: Int, col: Int){
+        if let square = squareWithName(name: "\(row)\(col)"){
+            square.removeAllChildren()
+        }
+    }
+    
+    func rowFromName(name: String) -> Int {
+        return Int(String(Array(name)[1]))!
+    }
+    
+    func colFromName(name: String) -> Int {
+        return Int(String(Array(name)[2]))!
+    }
+    
+ 
+    
+
+    
 }

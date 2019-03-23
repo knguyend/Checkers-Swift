@@ -7,6 +7,12 @@
 //
 import Foundation
 
+/**
+Returns a random move
+- Parameter board: take in a state of a board
+- Parameter player: 'c' for computer move and 'p' for player
+- Returns: a move object
+*/
 func makeRandomMove(board: Board, player: Character) -> Move {
     // jumps preferred
     var list = getJumps(board: board, player: player)

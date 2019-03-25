@@ -7,6 +7,7 @@
 //
 import Foundation
 
+//Instance of a game
 class Game {
     var board : Board
     var isSelectingPiece: Bool
@@ -20,6 +21,10 @@ class Game {
         self.chosenOne = Coordinate(x: -1, y: -1)
     }
     
+    /**
+    Make a comp move
+     - Returns: the best move returned from minimax algorithm
+     */
     func computerMove() -> Move {
         let newboard = board.newBoard()
         let tree = buildTree(board: newboard, depth: self.depth, player: "c")
@@ -43,6 +48,7 @@ class Game {
     
     
 }
+
 
 func startGame() {
     // create board

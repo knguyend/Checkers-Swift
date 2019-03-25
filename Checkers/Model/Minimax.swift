@@ -26,6 +26,12 @@ func makeRandomMove(board: Board, player: Character) -> Move {
     return list[r]
 }
 
+/**
+ Builds a tree of possible states of the board
+ - Parameter board: current state of the board
+ - Parameter depth: depth of the tree
+ - Returns: Node object as the root of the tree
+ */
 func buildTree(board: Board, depth: Int, player: Character) -> Node {
     let t = Node(board: board)
     if (depth == 0) { // leaf, so update value and return node
@@ -45,7 +51,7 @@ func buildTree(board: Board, depth: Int, player: Character) -> Node {
         let num = t.list.count
         t.numChildren = num;
         
-        // recur on each possible move - make children nodes
+        // recurse on each possible move - make children nodes
         for i in 0..<num {
             let newboard:Board = board.newBoard()
             newboard.updateBoard(curr: t.list[i].start, next: t.list[i].end, player: player)
@@ -64,7 +70,12 @@ func buildTree(board: Board, depth: Int, player: Character) -> Node {
     return t
 }
 
-// return best move
+/**
+ - Parameter t: root of the state tree
+ - Parameter depth: depth of tree to check
+ - Parameter isMaximizingPlayer: maximize player's move if true
+ - Returns: highest value we can get from choosing best path down the tree
+ */
 func minimax(t: Node, depth: Int, isMaximizingPlayer: Bool, alpha: Int, beta: Int) -> Int {
     if (depth == 0) {// return difference in # of pieces
         return t.value
@@ -99,7 +110,7 @@ func minimax(t: Node, depth: Int, isMaximizingPlayer: Bool, alpha: Int, beta: In
     else {
         best = Int.max
         
-        // recur for all children
+        // recurse for all children
         for i in 0..<t.numChildren {
             if (!t.children[i].list.isEmpty){
                 val = minimax(t: t.children[i], depth: depth-1, isMaximizingPlayer: true, alpha: t.alpha, beta: t.beta);

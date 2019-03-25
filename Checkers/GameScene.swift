@@ -30,6 +30,7 @@ class GameScene: SKScene {
         
     }
     
+    /** Draws pawns on top of board */
     func drawPieces() {
         let squareSide = Int((view?.bounds.width)!/8)
         var toggle: Bool = true
@@ -63,6 +64,7 @@ class GameScene: SKScene {
         }
     }
     
+    /** Draws board */
     func drawBoard() {
         // Board parameters
         let squareSide = Int((view?.bounds.width)!/8)
@@ -237,6 +239,8 @@ class GameScene: SKScene {
         return Int(String(Array(name)[1]))!
     }
     
+    
+    // FIX THISSSSSSS
     func colFromName(name: String) -> Int {
         return Int(String(Array(name)[2]))!
     }

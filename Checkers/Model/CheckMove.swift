@@ -50,7 +50,7 @@ class Move {
     
 }
 
-// check if player can move from (r1,c1) to (r2,c2)
+/** Check if player can move from (r1,c1) to (r2,c2)*/
 func canMove(board: Board, player: Character, move: Move) -> Bool {
     if (move.end.row < 0 || move.end.row >= 8 || move.end.col < 0 || move.end.col >= 8) {
         return false;
@@ -72,7 +72,7 @@ func canMove(board: Board, player: Character, move: Move) -> Bool {
     return true
 }
 
-// check if player can jump from (r1,c1) to (r2,c2)
+/** Check if player can jump from (r1,c1) to (r2,c2)*/
 func canJump(board:Board, player: Character, move:Move) -> Bool {
     //Out of bound
     if (move.end.col < 0 || move.end.col > 7 || move.end.row < 0 || move.end.row > 7) {
@@ -101,6 +101,13 @@ func canJump(board:Board, player: Character, move:Move) -> Bool {
     return true
 }
 
+/**
+ Get move of a pawn at a given coordinate
+ - Parameter board: current state of the board
+ - Parameter coordiante: coordinate of the pawn which we're finding moves for
+ - Parameter player: "c" or "p" to determine whose turn
+ - Returns: An array of possive moves.
+ */
 func getMovesForOne(board: Board, coordinate: Coordinate, player: Character) -> [Move] {
     var list: [Move] = []
     let i = coordinate.row
@@ -131,7 +138,7 @@ func getMovesForOne(board: Board, coordinate: Coordinate, player: Character) -> 
     return list
 }
 
-// return all possible moves for a player in an array
+/** Returns all possible moves for a player in an array */
 func getMoves(board: Board, player: Character) -> [Move] {
     // create list of possible moves; there are at most 2 moves for 12 pieces
     var list:[Move] = []
@@ -146,6 +153,13 @@ func getMoves(board: Board, player: Character) -> [Move] {
     return list
 }
 
+/**
+ Get move of a pawn at a given coordinate
+ - Parameter board: current state of the board
+ - Parameter coordiante: coordinate of the pawn which we're finding moves for
+ - Parameter player: "c" or "p" to determine whose turn
+ - Returns: An array of possive jumps.
+ */
 func getJumpsForOne(board: Board, coordinate: Coordinate, player: Character) -> [Move] {
     var list: [Move] = []
     let i = coordinate.row
@@ -177,7 +191,10 @@ func getJumpsForOne(board: Board, coordinate: Coordinate, player: Character) -> 
         
 }
 
-// return all possible jumps for a player in an array
+/**
+ Returns possible jumps of all the pawns of a player (comp or human).
+ - Returns: Array of Move
+ */
 func getJumps(board:Board, player:Character) -> [Move] {
     // create list of possible moves; there are at most 2 jumps for 12 pieces
     // each piece only allowed to make one jump!

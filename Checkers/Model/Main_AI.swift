@@ -32,7 +32,7 @@ class Game {
         if (!tree.isNull()) {       // if there is no available move, skip turn
             _ = minimax(t: tree, depth: self.depth, isMaximizingPlayer: true, alpha: Int.min, beta: Int.max) //find best move
             compMove = tree.bestMove
-            board.updateBoard(curr: compMove.start, next: compMove.end, player: "c") //make best move
+            board.updateBoard(curr: compMove.start, next: compMove.end, player: "c", captured: compMove.captured) //make best move
             // print updates
             print("====== Computer Move =====")
             print(compMove.toString())
@@ -83,7 +83,7 @@ func startGame() {
             }
             // if there is no available move, skip turn
             if (userMove.isValid) {
-                board.updateBoard(curr: userMove.start, next: userMove.end, player: player) // make move
+                board.updateBoard(curr: userMove.start, next: userMove.end, player: player, captured: userMove.captured) // make move
                 
                 // print updates
                 print(userMove.toString())
@@ -103,7 +103,7 @@ func startGame() {
             if (!tree.isNull()) {       // if there is no available move, skip turn
                 _ = minimax(t: tree, depth: DEPTH, isMaximizingPlayer: true, alpha: Int.min, beta: Int.max) //find best move
                 compMove = tree.bestMove
-                board.updateBoard(curr: compMove.start, next: compMove.end, player: player) //make best move
+                board.updateBoard(curr: compMove.start, next: compMove.end, player: player, captured: compMove.captured) //make best move
                 // print updates
                 print("====== Computer Move =====")
                 print(compMove.toString())

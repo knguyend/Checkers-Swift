@@ -8,18 +8,21 @@
 
 import Foundation
 
-func possibleMoves(row: Int, col: Int, board: Board) -> [Coordinate] {
-    var arr: [Coordinate] = []
-    var moveArr: [Move] = []
+func possibleMoves(row: Int, col: Int, board: Board) -> ([Coordinate],[Move]) {
+    var coords: [Coordinate] = []
+    var retMoves: [Move] = []
     let coord = Coordinate(x: row, y: col)
     let moves = getMovesForOne(board: board, coordinate: coord, player: "u")
     let jumps = getJumpsForOne(board: board, coordinate: coord, player: "u")
-    moveArr.append(contentsOf: jumps)
-    moveArr.append(contentsOf: moves)
-    for move in moveArr {
-        arr.append(move.end)
+    for move in moves {
+        coords.append(move.end)
+        retMoves.append(move)
     }
-    return arr
+    for jump in jumps {
+        coords.append(jump.end)
+        retMoves.append(jump)
+    }
+    return (coords,retMoves)
 }
 
 

@@ -16,8 +16,9 @@ class GameScene: SKScene {
     
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
-    var game: Game = Game(depth: 5)
-    var squares = [SKSpriteNode]()
+    var game: Game = Game(depth: 1)
+    var squares = [SKSpriteNode]() //List of clickable moves
+    var moveOptions = [String: Move]() //Dictionary of names of squares and the corresponding moves
     
     
     override func didMove(to view: SKView) {
@@ -99,7 +100,6 @@ class GameScene: SKScene {
         backgroundColor = UIColor(red: 44/255, green: 62/255, blue: 80/255, alpha: 1.0)
     }
     
-    
     func squareWithName(name:String) -> SKSpriteNode? {
         let square:SKSpriteNode? = self.childNode(withName: name) as! SKSpriteNode?
         return square
@@ -117,6 +117,7 @@ class GameScene: SKScene {
         view?.layer.addSublayer(layer)
     }
     
+    /** Decide what to do with when a touch begins */
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch:UITouch = touches.first!
         let positionInScene = touch.location(in: self)
@@ -124,10 +125,10 @@ class GameScene: SKScene {
         
         if let name = touchedNode.name
         {
-            print(name)
+            print("selected " + name)
             if (game.isSelectingPiece){
                 if (Array(name)[0] != "w"){
-                    
+                    return
                 }
                 let coord = Coordinate(x: rowFromName(name: name), y: colFromName(name: name))
                 game.chosenOne = coord
@@ -138,10 +139,10 @@ class GameScene: SKScene {
             else {
                 if (moveSelected(squares: squares, name: name, game: game)){
                     let move = game.computerMove()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2), execute: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
                         self.removePiece(row: move.start.row, col: move.start.col)
-                        if (move.isJump){
-                            self.removePiece(row: move.captured.row, col: move.captured.col)
+                        for coord in move.captured {
+                            self.removePiece(row: coord.row, col: coord.col)
                         }
                         self.drawPiece(row: move.end.row, col: move.end.col, player: "c", alpha: 1.0)
                     })
@@ -160,11 +161,12 @@ class GameScene: SKScene {
         else {
             let row = rowFromName(name: name)
             let col = colFromName(name: name)
-            let arr = possibleMoves(row: row, col: col, board: game.board)
+            let hash = possibleMoves(row: row, col: col, board: game.board)
+            let coords = hash.0
             let squareSide = Int((view?.bounds.width)!/8)
-            for coord in arr {
-                let row = coord.row
-                let col = coord.col
+            for i in 0..<coords.count {
+                let row = coords[i].row
+                let col = coords[i].col
                 print("\(row)\(col)")
                 if let square = squareWithName(name: "\(row)\(col)"){
                     let gamePiece = SKSpriteNode(imageNamed: "WhitePiece.png")
@@ -173,6 +175,7 @@ class GameScene: SKScene {
                     gamePiece.alpha = 0.5
                     square.addChild(gamePiece)
                     ret.append(square)
+                    moveOptions[gamePiece.name!] = hash.1[i]
                 }
             }
             return ret
@@ -182,27 +185,31 @@ class GameScene: SKScene {
     func deleteMoveOptions(squares: [SKSpriteNode]){
         for square in squares {
             square.removeAllChildren()
+            
         }
     }
     
     func moveSelected(squares: [SKSpriteNode], name: String, game: Game) -> Bool {
         if (Array(name)[0] != "s"){
             deleteMoveOptions(squares: squares)
+            moveOptions.removeAll()
             return false
         }
         else {
             let move = Move(startRow: game.chosenOne.row, startCol: game.chosenOne.col, endRow: rowFromName(name: name), endCol: colFromName(name: name))
-            game.board.updateBoard(curr: move.start, next: move.end, player: "u")
+            game.board.updateBoard(curr: move.start, next: move.end, player: "u",captured: (moveOptions[name]?.captured)!)
             deleteMoveOptions(squares: squares)
             removePiece(row: move.start.row, col: move.start.col)
             drawPiece(row: move.end.row, col: move.end.col, player: "u", alpha: 1)
-            if (move.isJump){
-                removePiece(row: move.captured.row, col: move.captured.col)
+            if let capturedPieces = moveOptions[name]?.captured {
+                for coord in capturedPieces {
+                    print("remove " + coord.toString())
+                    removePiece(row: coord.row, col: coord.col)
+                }
             }
-            
+            moveOptions.removeAll()
             return true
         }
-            
     }
     
     func drawPiece(row: Int, col: Int, player: Character, alpha: CGFloat){
@@ -239,8 +246,6 @@ class GameScene: SKScene {
         return Int(String(Array(name)[1]))!
     }
     
-    
-    // FIX THISSSSSSS
     func colFromName(name: String) -> Int {
         return Int(String(Array(name)[2]))!
     }

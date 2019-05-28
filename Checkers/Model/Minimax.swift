@@ -15,7 +15,10 @@ Returns a random move
 */
 func makeRandomMove(board: Board, player: Character) -> Move {
     // jumps preferred
-    var list = getJumps(board: board, player: player)
+    var list: [Move] = []
+    for jump in getJumps(board: board, player: player) {
+        list.append(jump)
+    }
     if (list.isEmpty){
         list = getMoves(board: board, player: player)
     }
@@ -54,7 +57,7 @@ func buildTree(board: Board, depth: Int, player: Character) -> Node {
         // recurse on each possible move - make children nodes
         for i in 0..<num {
             let newboard:Board = board.newBoard()
-            newboard.updateBoard(curr: t.list[i].start, next: t.list[i].end, player: player)
+            newboard.updateBoard(curr: t.list[i].start, next: t.list[i].end, player: player, captured: t.list[i].captured)
             var newplayer: Character
             if (player == "c"){
                 newplayer = "u"

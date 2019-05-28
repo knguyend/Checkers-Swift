@@ -67,17 +67,10 @@ class Board {
     }
     
     // make a legit move
-    func updateBoard(curr: Coordinate, next: Coordinate, player:Character) {
-        var jump = false;
-        if (curr.row - next.row == 2 || curr.row - next.row == -2){
-            jump = true
-        }
-        
-        if (jump) {
-            let enemyR = (curr.row + next.row)/2
-            let enemyC = (curr.col + next.col)/2
-        
-        // cout << "Piece at (" << enemyR << ", " << enemyC << ") destroyed!" <<endl;
+    func updateBoard(curr: Coordinate, next: Coordinate, player:Character, captured: [Coordinate]) {
+        for coord in captured {
+            let enemyR = coord.row
+            let enemyC = coord.col
         
             var enemyPieceValue = 3 // assume normal piece was destroyed
             if ((self.board[enemyR][enemyC]) < "a"){

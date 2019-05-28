@@ -3,8 +3,5 @@ A Checkers (Draughts) single-player game that runs on iOS platform, implemented 
 The AI for the game is implemented using minimax algorithm and alpha-beta pruning.
 
 ## Features to be implemented
-- Ability to double jump
-- Minimax algorithm to consider double jump
-
-## Known bugs
-- Move suggestion crashes near the endgame
+- Better GUI for moving pieces 
+- Machine Learning / Neural network for the AI 
